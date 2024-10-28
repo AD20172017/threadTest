@@ -9,8 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(BOOST_ROOT /user/include/boost)
 #set(Boost_USE_STATIC_LIBS ON)
 
+find_package(Boost REQUIRED COMPONENTS system)
 
-find_package(Boost COMPONENTS system)
 include_directories(${Boost_INCLUDE_DIR})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -23,10 +23,11 @@ add_executable(asioClient ${srcClient})
 
 
 
-target_link_libraries(asioClient ${Boost_LIBRARIES})
+# target_link_libraries(asioClient ${Boost_LIBRARIES})
+#链接线程库
 target_link_libraries(asioClient PRIVATE Threads::Threads)
 
-target_link_libraries(asioServer ${Boost_LIBRARIES})
+# target_link_libraries(asioServer ${Boost_LIBRARIES})
 target_link_libraries(asioServer PRIVATE Threads::Threads)
 
 #set(BOOST_ROOT "/usr/include/boost")
