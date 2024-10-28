@@ -1,21 +1,6 @@
-#include "boost/asio.hpp"
-#include "boost/system/error_code.hpp"
-#include "boost/system/system_error.hpp"
-
-#include <memory>
-#include<iostream>
-#include <string>
-#include <cstddef>
-
-
-using boost::asio::buffer;
-using boost::asio::io_service;
-using boost::system::error_code;
-namespace ip=boost::asio::ip;
-
-typedef std::shared_ptr<ip::tcp::socket> socket_ptr;
-
-
+#include "def.h"
+// https://llfc.club/category?catid=225RaiVNI8pFDD5L4m807g7ZwmF#!aid/2LfzYBkRCfdEDrtE6hWz8VrCLoS
+// https://mmoaay.gitbooks.io/boost-asio-cpp-network-programming-chinese/content/Chapter2.html
 void func(){
     std::cout<<"baidu:";
     io_service service;
@@ -69,6 +54,33 @@ int createSocket(){
 
 }
 
+void useBufferStr(ip::tcp::socket& sock){
+    asio::const_buffer buf;
+    auto sendBuff=asio::buffer("hello world!");//asio::const_buffer1类型
+
+    std::unique_ptr<char[]> uniqueBuf(new char[1024]);
+    auto sendBuff1=asio::buffer(static_cast<void*>(uniqueBuf.get()),1024);
+    std::fill_n(uniqueBuf.get(), 1024, 'A');
+
+
+    std::string str="buffer test";
+    std::size_t totalByteWritten=0;
+
+    while (totalByteWritten!=str.size())
+    {
+        totalByteWritten+=sock.write_some(
+            asio::buffer(str.c_str()+totalByteWritten,str.size()-totalByteWritten));
+    }
+    str+="\nsend test\n";
+    int sendLen=sock.send(asio::buffer(str.c_str(),str.size()));
+    // sendLen=asio::write(sock,asio::buffer(str.c_str(),str.size()));
+
+    if(sendLen<=0){
+        std::cout<<"ERROR\n";
+    }
+}
+
+
 int createAcceptorSocketAndBind(){
     unsigned short port=8888;
     // ip::address address=ip::address_v6::any();
@@ -84,12 +96,12 @@ int createAcceptorSocketAndBind(){
     std::cout<<"Acceptted and client address:"
     <<sock.remote_endpoint().address()<<':'<<sock.remote_endpoint().port()<<'\n';    
     // acceptor.open(ip::tcp::v6(),ec);
+    useBufferStr(sock);
 
     
     return 0;
-
-
 }
+
 
 int main(int argc, char const *argv[])
 {   

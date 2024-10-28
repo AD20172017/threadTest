@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16.3)
 project(myAsio)
 #add file here
-set(srcServer asio.cpp)
-set(srcClient client.cpp)
+set(srcServer asio.cpp def.h)
+set(srcClient client.cpp def.h)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
