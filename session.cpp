@@ -18,7 +18,7 @@ void session::send(char *msg, int max_length)
         return;
     }
     std::cout<<"MsgQueue is empty\n";
-
+    //写第一条数据
     async_write(_sock,buffer(msg,max_length),
         std::bind(&session::handleWrite,this,std::placeholders::_1,std::placeholders::_2,shared_from_this()));
 
