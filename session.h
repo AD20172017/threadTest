@@ -1,10 +1,8 @@
-#include <iostream>
-#include <functional>
-#include "boost/asio.hpp"
-#include "boost/system/error_code.hpp"
-#include <memory>
+#include "def.h"
 #include <map>
-
+#include <queue>
+#include <mutex>
+#include "msgNode.h"
 using namespace boost::asio;
 
 class server;
@@ -14,6 +12,10 @@ using session_ptr=std::shared_ptr<session>;
 class session:public std::enable_shared_from_this<session>
 {
 private:
+    void send(char* msg,int max_length);
+    std::queue<std::shared_ptr<msgNode>> msgQueue;
+    std::mutex msgMutex;
+    bool queueIsEmpty;
     ip::tcp::socket _sock;
     enum{
         max_length=1024

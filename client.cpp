@@ -1,4 +1,9 @@
 #include "def.h"
+
+using namespace boost;
+namespace ip=asio::ip;
+
+
 const int MAX_LENGTH = 1024;
 void readBuffer(ip::tcp::socket &sock)
 {
@@ -63,6 +68,7 @@ int main(int argc, char const *argv[])
         std::cout<<"Enter in:";
         char message[MAX_LENGTH];
         std::cin.getline(message,MAX_LENGTH);
+        // char* message="debug on\n";
         std::size_t msgLen=strlen(message);
 
         asio::write(sock,asio::buffer(message,msgLen));
