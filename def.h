@@ -18,7 +18,7 @@ using boost::system::error_code;
 class session;
 class server;
 class msgNode;
-
+#define MAX_LENGTH  1024*2
 const int HEAD_LENGTH=2;
 using msgLen=short;
 // namespace asio=boost::asio;

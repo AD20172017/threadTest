@@ -11,15 +11,19 @@ void session::send(char *msg, int max_length)
     
     //debug
     msgQueue.push(std::make_shared<msgNode>(msg,max_length));
-    
+    std::cout<<"send ";
 
     if(!isEmpty){
         std::cout<<"MsgQueue is full\n";
         return;
     }
-    std::cout<<"MsgQueue is empty\n";
+    std::cout<<"MsgQueue is empty\n"<<msg;
     //写第一条数据
-    async_write(_sock,buffer(msg,max_length),
+    auto &toSend=msgQueue.front();
+    //必须用约定协议
+    // async_write(_sock,buffer(msg,max_length),
+    //     std::bind(&session::handleWrite,this,std::placeholders::_1,std::placeholders::_2,shared_from_this()));
+    async_write(_sock,buffer(toSend->_msg,toSend->_maxLen),
         std::bind(&session::handleWrite,this,std::placeholders::_1,std::placeholders::_2,shared_from_this()));
 
 }
@@ -64,6 +68,7 @@ void session::handleRead(const boost::system::error_code ec, std::size_t bytesTr
 
                 recvMsgNode=std::make_shared<msgNode>(dataLen);
                 if(bytesTransferred<dataLen){
+                    std::cout<<"need more data\n";
                     memcpy(recvMsgNode->_msg + recvMsgNode->_curLen, _data + copyLen, bytesTransferred);
                     recvMsgNode->_curLen += bytesTransferred;
                     ::memset(_data, 0, MAX_LENGTH);
@@ -163,8 +168,10 @@ void session::handleWrite(const boost::system::error_code ec, std::size_t bytesT
             auto& msg=msgQueue.front();
             
             async_write(_sock,buffer(msg->_msg,msg->_maxLen),
-               std::bind(&session::handleRead,this,std::placeholders::_1,std::placeholders::_2,ptr));
+               std::bind(&session::handleWrite,this,std::placeholders::_1,std::placeholders::_2,ptr));
 
+        }else{
+            std::cout<<"\nwrite finish\n";
         }
         // memset(_data,0,max_length);
         // _sock.async_read_some(buffer(_data,max_length),
@@ -172,6 +179,7 @@ void session::handleWrite(const boost::system::error_code ec, std::size_t bytesT
 
     }else{
         std::cout<<"Write error\n"<<ec.message()<<std::endl;;
+        close();
         _ser->clearSession(_uuid);
     }
 }

@@ -1,12 +1,12 @@
 #include "def.h"
-
+#include <chrono>
 using namespace boost;
 using namespace std;
 
 namespace ip=asio::ip;
 
 
-const int MAX_LENGTH = 1024;
+// const int MAX_LENGTH = 1024;
 void readBuffer(ip::tcp::socket &sock)
 {
     const unsigned int MESSAGE_SIZE = 32;
@@ -56,6 +56,8 @@ int clientEndPoint()
 int main(int argc, char const *argv[])
 {
     try {
+
+        int clientNum=10000;
         //创建上下文服务
         boost::asio::io_context   ioc;
         //构造endpoint
@@ -74,9 +76,10 @@ int main(int argc, char const *argv[])
                 // memcpy(send_data, &request_length, 2);
                 // memcpy(send_data + 2, request, request_length);
                 // boost::asio::write(sock, boost::asio::buffer(send_data, request_length + 2));
-        thread send_thread([&sock] {
-            for (;;) {
-                this_thread::sleep_for(std::chrono::milliseconds(2));
+        thread send_thread([&sock,clientNum] {
+            for (int i=0;i<clientNum;++i) {
+                this_thread::sleep_for(std::chrono::milliseconds(200));
+                std::cout<<"send data\n";
                 const char* request = "hello world!";
                 size_t request_length = strlen(request);
                 char send_data[MAX_LENGTH] = { 0 };
@@ -85,9 +88,9 @@ int main(int argc, char const *argv[])
                 boost::asio::write(sock, boost::asio::buffer(send_data, request_length + 2));
             }
             });
-        thread recv_thread([&sock] {
-            for (;;) {
-                this_thread::sleep_for(std::chrono::milliseconds(2));
+        thread recv_thread([&sock,clientNum] {
+            for (int i=0;i<clientNum;++i) {
+                this_thread::sleep_for(std::chrono::milliseconds(20));
                 cout << "begin to receive..." << endl;
                 char reply_head[HEAD_LENGTH];
                 size_t reply_length = boost::asio::read(sock, boost::asio::buffer(reply_head, HEAD_LENGTH));
@@ -102,7 +105,10 @@ int main(int argc, char const *argv[])
             }
             });
         send_thread.join();
+        std::cout<<"send finsih\n";
         recv_thread.join();
+        std::cout<<"recv finsih\n";
+
     }
     catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << endl;
