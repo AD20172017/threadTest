@@ -1,4 +1,3 @@
-#include "def.h"
 #include <map>
 #include <queue>
 #include <mutex>
@@ -11,6 +10,8 @@ using session_ptr=std::shared_ptr<session>;
 
 class session:public std::enable_shared_from_this<session>
 {
+#define MAX_LENGTH  1024*2
+#define HEAD_LENGTH 2
 private:
     void send(char* msg,int max_length);
     std::queue<std::shared_ptr<msgNode>> msgQueue;
@@ -18,11 +19,18 @@ private:
     bool queueIsEmpty;
     ip::tcp::socket _sock;
     enum{
-        max_length=1024
+        max_length=MAX_LENGTH
     };
     char _data[max_length];
     server* _ser;
     std::string _uuid;
+
+    std::shared_ptr<msgNode> recvMsgNode;
+    std::shared_ptr<msgNode> recvHeadNode;
+    bool headDone;
+    bool sockIsClose;
+
+    void close();
     void handleRead(const boost::system::error_code ec, std::size_t bytesTransferred,
         session_ptr ptr);
     void handleWrite(const boost::system::error_code ec, std::size_t bytesTransferred,

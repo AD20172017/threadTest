@@ -18,6 +18,9 @@ using boost::system::error_code;
 class session;
 class server;
 class msgNode;
+
+const int HEAD_LENGTH=2;
+using msgLen=short;
 // namespace asio=boost::asio;
 // namespace ip=boost::asio::ip;
 

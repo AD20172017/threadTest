@@ -1,6 +1,8 @@
 #include "def.h"
 
 using namespace boost;
+using namespace std;
+
 namespace ip=asio::ip;
 
 
@@ -23,7 +25,7 @@ int clientEndPoint()
 {
     std::string ipAddress = "127.0.0.1";
     unsigned short port = 8888;
-    error_code ec;
+    system::error_code ec;
     ip::address address = ip::address::from_string(ipAddress, ec);
 
     if (ec.value() != 0)
@@ -53,40 +55,57 @@ int clientEndPoint()
 
 int main(int argc, char const *argv[])
 {
-    try
-    {
-        asio::io_context ioc;
-        ip::tcp::endpoint remoteEp(ip::address::from_string("127.0.0.1"), 8888);
-        ip::tcp::socket sock(ioc);
-        error_code error = asio::error::host_not_found;
-        sock.connect(remoteEp, error);
-        if (error)
-        {
-            std::cout << "connect fail:" << error.value() << "msg:" << error.message();
+    try {
+        //创建上下文服务
+        boost::asio::io_context   ioc;
+        //构造endpoint
+        ip::tcp::endpoint  remote_ep(ip::address::from_string("127.0.0.1"), 8888);
+        ip::tcp::socket  sock(ioc);
+        boost::system::error_code   error = boost::asio::error::host_not_found; ;
+        sock.connect(remote_ep, error);
+        if (error) {
+            cout << "connect failed, code is " << error.value() << " error msg is " << error.message();
             return 0;
         }
-        std::cout<<"Enter in:";
-        char message[MAX_LENGTH];
-        std::cin.getline(message,MAX_LENGTH);
-        // char* message="debug on\n";
-        std::size_t msgLen=strlen(message);
-
-        asio::write(sock,asio::buffer(message,msgLen));
         
-        char reply[MAX_LENGTH];
-        auto replyLen=asio::read(sock,asio::buffer(reply,msgLen));
-        std::cout<<"Reply:";
-        std::cout.write(reply,replyLen);
-        std::cout<<'\n';
-
-
+                // const char* request = "hello world!";
+                // size_t request_length = strlen(request);
+                // char send_data[MAX_LENGTH] = { 0 };
+                // memcpy(send_data, &request_length, 2);
+                // memcpy(send_data + 2, request, request_length);
+                // boost::asio::write(sock, boost::asio::buffer(send_data, request_length + 2));
+        thread send_thread([&sock] {
+            for (;;) {
+                this_thread::sleep_for(std::chrono::milliseconds(2));
+                const char* request = "hello world!";
+                size_t request_length = strlen(request);
+                char send_data[MAX_LENGTH] = { 0 };
+                memcpy(send_data, &request_length, 2);
+                memcpy(send_data + 2, request, request_length);
+                boost::asio::write(sock, boost::asio::buffer(send_data, request_length + 2));
+            }
+            });
+        thread recv_thread([&sock] {
+            for (;;) {
+                this_thread::sleep_for(std::chrono::milliseconds(2));
+                cout << "begin to receive..." << endl;
+                char reply_head[HEAD_LENGTH];
+                size_t reply_length = boost::asio::read(sock, boost::asio::buffer(reply_head, HEAD_LENGTH));
+                short msglen = 0;
+                memcpy(&msglen, reply_head, HEAD_LENGTH);
+                char msg[MAX_LENGTH] = { 0 };
+                size_t  msg_length = boost::asio::read(sock, boost::asio::buffer(msg, msglen));
+                std::cout << "Reply is: ";
+                std::cout.write(msg, msglen) << endl;
+                std::cout << "Reply len is " << msglen;
+                std::cout << "\n";
+            }
+            });
+        send_thread.join();
+        recv_thread.join();
     }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << '\n';
+    catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << endl;
     }
-
-    
-
     return 0;
 }
