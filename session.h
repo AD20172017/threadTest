@@ -1,3 +1,4 @@
+#include "def.h"
 #include <map>
 #include <queue>
 #include <mutex>
@@ -11,17 +12,18 @@ using session_ptr=std::shared_ptr<session>;
 class session:public std::enable_shared_from_this<session>
 {
 #define MAX_LENGTH  1024*2
-#define HEAD_LENGTH 2
+// #define HEAD_LENGTH 2
 private:
     void send(char* msg,int max_length);
+    void send(char* msg,int max_length,msgLen msg_id);
+
+
     std::queue<std::shared_ptr<msgNode>> msgQueue;
     std::mutex msgMutex;
     bool queueIsEmpty;
     ip::tcp::socket _sock;
-    enum{
-        max_length=MAX_LENGTH
-    };
-    char _data[max_length];
+    
+    char _data[MAX_LENGTH];
     server* _ser;
     std::string _uuid;
 

@@ -7,7 +7,7 @@
 
 #include <memory>
 #include<iostream>
-#include <string>
+#include <cstring>
 #include <cstddef>
 
 
@@ -18,9 +18,7 @@ using boost::system::error_code;
 class session;
 class server;
 class msgNode;
-#define MAX_LENGTH  1024*2
-const int HEAD_LENGTH=2;
-using msgLen=short;
+
 // namespace asio=boost::asio;
 // namespace ip=boost::asio::ip;
 
