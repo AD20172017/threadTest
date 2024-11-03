@@ -35,7 +35,7 @@ recvNode::recvNode(msgLen max_len, msgLen msg_id)
 {
 }
 
-sendNode::sendNode(const char *msg, msgLen max_len, msgLen msg_id)
+sendNode::sendNode( char *msg, msgLen max_len, msgLen msg_id)
     :msgNode(max_len+HEAD_TOTAL_LEN),_msgId(msg_id)
 {
     msgLen msgIdHost=boost::asio::detail::socket_ops::host_to_network_short(_msgId);

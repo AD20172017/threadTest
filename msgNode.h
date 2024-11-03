@@ -33,7 +33,7 @@ private:
 };
 class sendNode:public msgNode {
 public:
-    sendNode(const char* msg,msgLen max_len, msgLen msg_id);
+    sendNode(char* msg,msgLen max_len, msgLen msg_id);
 private:
     msgLen _msgId;
 };

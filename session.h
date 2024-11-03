@@ -3,6 +3,10 @@
 #include <queue>
 #include <mutex>
 #include "msgNode.h"
+#include "json/json.h"
+#include "json/value.h"
+#include "json/reader.h"
+
 using namespace boost::asio;
 
 class server;

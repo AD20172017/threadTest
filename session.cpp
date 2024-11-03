@@ -6,11 +6,11 @@ void session::send(char *msg, int msg_id)
 
     std::lock_guard<std::mutex> lock(msgMutex);
     int qSize = msgQueue.size();
-
+    bool isEmpty=msgQueue.empty();
     // debug
-    msgQueue.push(std::make_shared<sendNode>(msg, msg_id));
+    msgQueue.push(std::make_shared<sendNode>(msg,strlen(msg), msg_id));
     std::cout << "Send";
-    if (!msgQueue.empty())
+    if (!isEmpty)
     {
         std::cout << "MsgQueue is full\n";
         return;
@@ -29,11 +29,11 @@ void session::send(char *msg, int max_length, msgLen msg_id)
 {
     std::lock_guard<std::mutex> lock(msgMutex);
     int qSize = msgQueue.size();
-
+    bool isEmpty=msgQueue.empty();
     // debug
     msgQueue.push(std::make_shared<sendNode>(msg, max_length, msg_id));
     std::cout << "Send";
-    if (!msgQueue.empty())
+    if (!isEmpty)
     {
         std::cout << "MsgQueue is full\n";
         return;
@@ -53,9 +53,10 @@ void session::handleRead(const boost::system::error_code ec, std::size_t bytesTr
 {
     if (!ec.value())
     {
-        std::cout << "start read:" << '\n';
         if (!headDone)
         {
+            std::cout << "start read head:" << '\n';
+
             if (bytesTransferred < HEAD_ID_LEN + HEAD_DATA_LEN)
             {
                 std::cout << "read head error\n";
@@ -64,12 +65,12 @@ void session::handleRead(const boost::system::error_code ec, std::size_t bytesTr
                 return;
             }
             msgLen msgId = 0;
-            memcpy(&msgId, recvHeadNode->_msg, HEAD_ID_LEN);
+            memcpy(&msgId, _data, HEAD_ID_LEN);
             msgId = detail::socket_ops::network_to_host_short(msgId);
             std::cout << "msg id:" << msgId;
 
             msgLen dataLen = 0;
-            memcpy(&dataLen, recvHeadNode->_msg + HEAD_ID_LEN, HEAD_DATA_LEN);
+            memcpy(&dataLen, _data + HEAD_ID_LEN, HEAD_DATA_LEN);
             dataLen = detail::socket_ops::network_to_host_short(dataLen);
             std::cout << "  data len:" << dataLen << '\n';
 
@@ -78,6 +79,8 @@ void session::handleRead(const boost::system::error_code ec, std::size_t bytesTr
             async_read(_sock,buffer(recvMsgNode->_msg,recvMsgNode->_maxLen),
                 std::bind(&session::handleRead,this,std::placeholders::_1,std::placeholders::_2,shared_from_this()));
         }else{
+            std::cout << "start read data:" << '\n';
+
             if (bytesTransferred < recvMsgNode->_maxLen)
             {
                 std::cout << "read data error\n";
@@ -85,11 +88,24 @@ void session::handleRead(const boost::system::error_code ec, std::size_t bytesTr
                 _ser->clearSession(_uuid);
                 return;
             }
-            memcpy(recvMsgNode->_msg,_data,recvMsgNode->_maxLen);
+            headDone=false;
+            // memcpy(recvMsgNode->_msg,_data,recvMsgNode->_maxLen);
+            // std::cout<<"data is"<<_data<<std::endl;
             recvMsgNode->_msg[recvMsgNode->_maxLen]='\0';
-            std::cout<<"receive data:"<<recvMsgNode->_msg<<std::endl;
 
-            send(recvMsgNode->_msg,recvMsgNode->_maxLen);
+
+            Json::Reader reader;
+            Json::Value root;
+            reader.parse(std::string(recvMsgNode->_msg, recvMsgNode->_maxLen), root);
+            std::cout << "recevie msg id  is " << root["id"].asInt() << " msg data is "
+                << root["data"].asString() << std::endl;
+            root["data"] = "server has received msg, msg data is " + root["data"].asString();
+            std::string return_str = root.toStyledString();
+
+
+            // std::cout<<"receive data:"<<recvMsgNode->_msg<<std::endl;
+
+            send(return_str.data(), root["id"].asInt());
 
             recvMsgNode->clear();
 
@@ -243,10 +259,11 @@ void session::handleWrite(const boost::system::error_code ec, std::size_t bytesT
     }
 }
 
-session::session(io_context &ioc, server *ser) : _sock(ioc), _ser(ser), queueIsEmpty(true), sockIsClose(false)
+session::session(io_context &ioc, server *ser) : _sock(ioc), _ser(ser), queueIsEmpty(true), sockIsClose(false),headDone(false)
 {
     boost::uuids::uuid id = boost::uuids::random_generator()();
     _uuid = boost::uuids::to_string(id);
+    std::cout<<"session create:"<<_uuid<<std::endl;
     recvHeadNode = std::make_shared<msgNode>(HEAD_TOTAL_LEN);
 }
 
