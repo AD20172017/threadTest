@@ -1,16 +1,22 @@
+#ifndef _SESSION_H_
+#define _SESSION_H_
+
+
+
 #include "def.h"
 #include <map>
 #include <queue>
 #include <mutex>
 #include "msgNode.h"
+#include "logicSystem.h"
 #include "json/json.h"
 #include "json/value.h"
 #include "json/reader.h"
 
 using namespace boost::asio;
 
-class server;
-class session;
+// class server;
+// class session;
 using session_ptr=std::shared_ptr<session>;
 
 class session:public std::enable_shared_from_this<session>
@@ -18,8 +24,8 @@ class session:public std::enable_shared_from_this<session>
 #define MAX_LENGTH  1024*2
 // #define HEAD_LENGTH 2
 private:
-    void send(char* msg,int max_length);
-    void send(char* msg,int max_length,msgLen msg_id);
+    // void send(char* msg,int max_length);
+    // void send(char* msg,int max_length,msgLen msg_id);
 
 
     std::queue<std::shared_ptr<msgNode>> msgQueue;
@@ -31,7 +37,7 @@ private:
     server* _ser;
     std::string _uuid;
 
-    std::shared_ptr<msgNode> recvMsgNode;
+    std::shared_ptr<recvNode> recvMsgNode;
     std::shared_ptr<msgNode> recvHeadNode;
     bool headDone;
     bool sockIsClose;
@@ -43,6 +49,8 @@ private:
         session_ptr ptr);
 
 public:
+    void send(char* msg,int max_length);
+    void send(char* msg,int max_length,msgLen msg_id);
     session(io_context& ioc,server* ser);
     ~session();
     ip::tcp::socket& getSocket(){
@@ -72,3 +80,5 @@ public:
     ~server();
     friend class session;
 };
+
+#endif // ! _SESSION_H_

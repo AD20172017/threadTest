@@ -93,21 +93,25 @@ void session::handleRead(const boost::system::error_code ec, std::size_t bytesTr
             // std::cout<<"data is"<<_data<<std::endl;
             recvMsgNode->_msg[recvMsgNode->_maxLen]='\0';
 
+            // auto i=singleton<logicSystem>::getInstance();
 
-            Json::Reader reader;
-            Json::Value root;
-            reader.parse(std::string(recvMsgNode->_msg, recvMsgNode->_maxLen), root);
-            std::cout << "recevie msg id  is " << root["id"].asInt() << " msg data is "
-                << root["data"].asString() << std::endl;
-            root["data"] = "server has received msg, msg data is " + root["data"].asString();
-            std::string return_str = root.toStyledString();
+            // 为什么这样就通的过
+            singleton<logicSystem>::getInstance()->postMsg2Que(std::make_shared<logicNode>(shared_from_this(),recvMsgNode));
+            // logicSystem::getInstance()->postMsg2Que(std::make_shared<logicNode>(shared_from_this(),recvMsgNode));
+
+            // Json::Reader reader;
+            // Json::Value root;
+            // reader.parse(std::string(recvMsgNode->_msg, recvMsgNode->_maxLen), root);
+            // std::cout << "recevie msg id  is " << root["id"].asInt() << " msg data is "
+            //     << root["data"].asString() << std::endl;
+            // root["data"] = "server has received msg, msg data is " + root["data"].asString();
+            // std::string return_str = root.toStyledString();
 
 
-            // std::cout<<"receive data:"<<recvMsgNode->_msg<<std::endl;
 
-            send(return_str.data(), root["id"].asInt());
+            // send(return_str.data(), root["id"].asInt());
 
-            recvMsgNode->clear();
+            // recvMsgNode->clear();
 
             async_read(_sock, buffer(_data, HEAD_ID_LEN + HEAD_DATA_LEN),
                std::bind(&session::handleRead, this, std::placeholders::_1, std::placeholders::_2, shared_from_this()));

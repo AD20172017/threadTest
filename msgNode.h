@@ -10,6 +10,8 @@ using msgLen=short;
 class msgNode
 {   
     friend class session;
+    friend class logicSystem;
+
 protected:
     msgLen _curLen;
     msgLen _maxLen;
@@ -28,12 +30,18 @@ public:
 class recvNode :public msgNode {
 public:
     recvNode(msgLen max_len, msgLen msg_id);
+    int getId(){
+        return _msgId;
+    }
 private:
     msgLen _msgId;
 };
 class sendNode:public msgNode {
 public:
     sendNode(char* msg,msgLen max_len, msgLen msg_id);
+    int getId(){
+        return _msgId;
+    }
 private:
     msgLen _msgId;
 };
