@@ -8,13 +8,15 @@ int main(int argc, char const *argv[])
     // createAcceptorSocketAndBind();
     try
     {
-    io_context ioc;
-    boost::asio::signal_set signals(ioc, SIGINT, SIGTERM);
-    signals.async_wait([&ioc](const boost::system::error_code& error, int signal_number) {
-            ioc.stop();
-            });
-    server s(ioc,8888);
-    ioc.run();
+    auto pool = asioIoServicePool::getInstance();
+		boost::asio::io_context  io_context;
+		boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
+		signals.async_wait([&io_context,pool](auto, auto) {
+			io_context.stop();
+			pool->stop();
+			});
+		server s(io_context,8888);
+		io_context.run();
     }
     catch(const std::exception& e)
     {

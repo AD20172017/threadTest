@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 project(myAsio)
 #add file here
-set(srcServer server.cpp def.h mySingleton.h logicSystem.h logicSystem.cpp session.h session.cpp  msgNode.h msgNode.cpp )
+set(srcServer server.cpp def.h mySingleton.h logicSystem.h logicSystem.cpp session.h session.cpp  msgNode.h msgNode.cpp asioIoServicePool.h asioIoServicePool.cpp)
 set(srcClient client.cpp def.h )
 
 set(CMAKE_CXX_STANDARD 17)

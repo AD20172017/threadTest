@@ -286,7 +286,9 @@ void session::start()
 
 void server::startAccept()
 {
-    auto newSesssion = std::make_shared<session>(_ioc, this);
+   
+    auto& ioc=asioIoServicePool::getInstance()->getIoService();
+    auto newSesssion = std::make_shared<session>(ioc, this);
     _acceptor.async_accept(newSesssion->getSocket(),
                            std::bind(&server::handleAccept, this, newSesssion, std::placeholders::_1));
 }

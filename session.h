@@ -12,7 +12,7 @@
 #include "json/json.h"
 #include "json/value.h"
 #include "json/reader.h"
-
+#include "asioIoServicePool.h"
 using namespace boost::asio;
 
 // class server;
@@ -78,6 +78,7 @@ private:
 public:
     server(io_context& ioc,short port);
     ~server();
+    
     friend class session;
 };
 
