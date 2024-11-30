@@ -1,6 +1,5 @@
 #include "def.h"
-// https://llfc.club/category?catid=225RaiVNI8pFDD5L4m807g7ZwmF#!aid/2LfzYBkRCfdEDrtE6hWz8VrCLoS
-// https://mmoaay.gitbooks.io/boost-asio-cpp-network-programming-chinese/content/Chapter2.html
+
 void func(){
     std::cout<<"baidu:";
     io_service service;
